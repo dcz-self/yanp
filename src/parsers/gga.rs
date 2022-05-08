@@ -5,7 +5,7 @@ use crate::parse::*;
 fn build_gga<'a>(
     sentence: (
         Option<GpsTime>,
-        GpsPosition,
+        Option<GpsPosition>,
         Option<u8>,
         Option<u8>,
         Option<f32>,
@@ -28,12 +28,18 @@ fn build_gga<'a>(
     })
 }
 
+//use nom::count;
+
 named!(pub (crate) parse_gga<GgaData>,
     map_res!(
         do_parse!(
             time: opt!(complete!(parse_utc_stamp)) >>
             char!(',') >>
-            position: complete!(parse_gps_position) >>
+            position: opt!(
+                complete!(parse_gps_position)
+                //| nom::combinator::value(None, take_until!(","))
+            )
+            >>
             char!(',') >>
             quality: opt!(map_res!(take_until!(","), parse_num::<u8>)) >>
             char!(',') >>
@@ -54,3 +60,30 @@ named!(pub (crate) parse_gga<GgaData>,
         build_gga
     )
 );
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn parse() {
+        let s = b"175929.860,,,,,0,00,25.5,,,,,,*";
+        assert_eq!(
+            parse_gga(s),
+            Ok((
+                &b""[..],
+                GgaData {
+                    time: None,
+                    position: None,
+                    quality: None,
+                    hdop: Some(2.9),
+                    sats_in_view: None,
+                    geoid_altitude: None,
+                    age_of_differential: None,
+                    altitude: None,
+                    differential_station_id: None,
+                },
+            ))
+        )
+    }  
+}

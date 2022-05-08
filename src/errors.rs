@@ -2,7 +2,7 @@ use crate::parse::StatusParsingError;
 use crate::sentences::SentenceType;
 /// A list of errors that can occur during the creation of
 /// a GeneralSentence
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum NmeaSentenceError<'a> {
     /// Is thrown if the sentence was longer than 102 characters.
     /// The integer associated with this is the length of the sentence
@@ -22,7 +22,7 @@ pub enum NmeaSentenceError<'a> {
     /// a list of already known types
     UnkownTypeError(&'a [u8]),
     /// Is thrown if parsing the data of a sentence into a data struct fails
-    DataParsingError(nom::Err<(&'a [u8], nom::error::ErrorKind)>),
+    DataParsingError(nom::Err<nom::error::Error<&'a [u8]>>),
     /// Is thrown if one of the status enums defined inside parse.rs is not able
     /// to be created based on the given input
     StatusParsingError(StatusParsingError),

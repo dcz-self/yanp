@@ -277,7 +277,7 @@ pub struct GbsData {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GgaData {
     pub time: Option<GpsTime>,
-    pub position: GpsPosition,
+    pub position: Option<GpsPosition>,
     pub quality: Option<GpsQuality>,
     pub sats_in_view: Option<u8>,
     pub hdop: Option<f32>,
@@ -477,7 +477,7 @@ macro_rules! sentence_parse_generator {
 }
 
 fn parse_result_to_data<'a, Data>(
-    parse_result: Result<(&'a [u8], Data), nom::Err<(&'a [u8], nom::error::ErrorKind)>>,
+    parse_result: Result<(&'a [u8], Data), nom::Err<nom::error::Error<&'a [u8]>>>,
 ) -> Result<Data, NmeaSentenceError<'a>> {
     match parse_result {
         Ok(value) => Ok(value.1),
