@@ -439,6 +439,7 @@ pub struct VtgData {
     pub bearing_magnetic: Option<f32>,
     pub speed_knots: Option<f32>,
     pub speed_kmh: Option<f32>,
+    pub mode: Option<char>,
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct VwrData {}

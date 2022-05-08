@@ -12,16 +12,42 @@ named!(pub (crate) parse_vtg<VtgData>,
             speed_knots: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             tag!(",N,") >>
             speed_kmh: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
-            tag!(",K*") >>
-            (bearing_true, bearing_magnetic, speed_knots, speed_kmh)
+            tag!(",K") >>
+            opt!(char!(',')) >>
+            mode: opt!(one_of!("ADEMSN")) >>
+            char!('*') >>
+            (bearing_true, bearing_magnetic, speed_knots, speed_kmh, mode)
         ),
-        | sentence: (Option<f32>, Option<f32>, Option<f32>, Option<f32>)| -> Result<VtgData, NmeaSentenceError> {
+        | sentence: (Option<f32>, Option<f32>, Option<f32>, Option<f32>, Option<char>)| -> Result<VtgData, NmeaSentenceError> {
             Ok(VtgData{
                 bearing_true: sentence.0,
                 bearing_magnetic: sentence.1,
                 speed_knots: sentence.2,
                 speed_kmh: sentence.3,
+                mode: sentence.4,
             })
         }
     )
 );
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn parse() {
+        let s = b"0.00,T,,M,0.00,N,0.00,K,A*";
+        assert_eq!(
+            parse_vtg(s),
+            Ok((
+                &b""[..],
+                VtgData { bearing_magnetic: None,
+                    bearing_true: Some(0.0),
+                    speed_knots: Some(0.0),
+                    speed_kmh: Some(0.0),
+                    mode: Some('A'),
+                },
+            ))
+        )
+    }  
+}
