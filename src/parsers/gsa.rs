@@ -50,7 +50,7 @@ named!(
     parse_sat_id<Option<u8>>,
     map_res!(
         do_parse!(id: opt!(map_res!(take_until!(","), parse_num::<u8>)) >> char!(',') >> (id)),
-        |sentence: (Option<u8>)| -> Result<Option<u8>, NmeaSentenceError> { Ok(sentence) }
+        |sentence: Option<u8>| -> Result<Option<u8>, NmeaSentenceError> { Ok(sentence) }
     )
 );
 

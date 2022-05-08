@@ -28,7 +28,8 @@ named!(pub (crate) parse_gll<GllData>,
             time: opt!(complete!(parse_utc_stamp)) >>
             char!(',') >>
             status: opt!(one_of!("AVP")) >>
-            opt!(tag!(",M")) >>
+            opt!(char!(',')) >>
+            _mode: opt!(one_of!("ADEMSN")) >>
             char!('*') >>
             (position, time, status)
         ),
