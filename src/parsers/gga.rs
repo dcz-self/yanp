@@ -51,9 +51,9 @@ named!(pub (crate) parse_gga<GgaData>,
             hdop: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             char!(',') >>
             altitude: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
-            tag!(",M,") >>
+            alt!(tag!(",M,") | tag!(",,")) >>
             geoid_altitude: opt!(take_until!(",")) >>
-            tag!(",M,") >>
+            alt!(tag!(",M,") | tag!(",,")) >>
             age_of_differential: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             char!(',') >>
             differential_station_id: opt!(map_res!(take_until!("*"), parse_num::<u16>)) >>
@@ -77,6 +77,28 @@ mod tests {
                 &b""[..],
                 GgaData {
                     time: Some(GpsTime { hour: 17, minute: 59, second: 29, millisecond: 860 }),
+                    position: None,
+                    quality: Some(GpsQuality::FixNotAvailable),
+                    hdop: Some(25.5),
+                    sats_in_view: Some(0),
+                    geoid_altitude: None,
+                    age_of_differential: None,
+                    altitude: None,
+                    differential_station_id: None,
+                },
+            ))
+        )
+    }  
+    
+    #[test]
+    fn parse_time() {
+        let s = b"201939.451,,,,,0,00,25.5,,,,,,*";
+        assert_eq!(
+            parse_gga(s),
+            Ok((
+                &b""[..],
+                GgaData {
+                    time: Some(GpsTime { hour: 20, minute: 19, second: 39, millisecond: 451 }),
                     position: None,
                     quality: Some(GpsQuality::FixNotAvailable),
                     hdop: Some(25.5),
