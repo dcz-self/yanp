@@ -6,14 +6,13 @@ named!(pub (crate) parse_vtg<VtgData>,
     map_res!(
         do_parse!(
             bearing_true: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
-            tag!(",T,") >>
+            alt!(tag!(",T,") | tag!(",,")) >>
             bearing_magnetic: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
-            tag!(",M,") >>
+            alt!(tag!(",M,") | tag!(",,"))>>
             speed_knots: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
-            tag!(",N,") >>
+            alt!(tag!(",N,") | tag!(",,")) >>
             speed_kmh: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
-            tag!(",K") >>
-            opt!(char!(',')) >>
+            char!(',') >> opt!(char!('K')) >> opt!(char!(',')) >>
             mode: opt!(one_of!("ADEMSN")) >>
             char!('*') >>
             (bearing_true, bearing_magnetic, speed_knots, speed_kmh, mode)
@@ -49,5 +48,22 @@ mod tests {
                 },
             ))
         )
-    }  
+    }
+    
+    #[test]
+    fn empty() {
+        let s = b",,,,,,,,M*";
+        assert_eq!(
+            parse_vtg(s),
+            Ok((
+                &b""[..],
+                VtgData { bearing_magnetic: None,
+                    bearing_true: None,
+                    speed_knots: None,
+                    speed_kmh: None,
+                    mode: Some('M'),
+                },
+            ))
+        )
+    }
 }
