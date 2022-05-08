@@ -290,7 +290,7 @@ pub struct GgaData {
 pub struct GlcData {}
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GllData {
-    pub position: GpsPosition,
+    pub position: Option<GpsPosition>,
     pub time: Option<GpsTime>,
     pub status: Option<GllStatus>,
 }
