@@ -36,8 +36,11 @@ named!(pub (crate) parse_gga<GgaData>,
             time: opt!(complete!(parse_utc_stamp)) >>
             char!(',') >>
             position: alt!(
-                complete!(parse_gps_position)
-                | nom::combinator::value(None, take_until!(","))
+                complete!(nom::combinator::map(parse_gps_position, Some))
+                | complete!(nom::combinator::value(
+                    None,
+                    nom::bytes::complete::tag(b",,,")
+                ))
             )
             >>
             char!(',') >>
@@ -67,17 +70,17 @@ mod tests {
     use super::*;
     #[test]
     fn parse() {
-        let s = b"175929.860,,,,,0,00,25.5,,,,,,*";
+        let s = b"175929.860,,,,,0,00,25.5,,M,,M,,*";
         assert_eq!(
             parse_gga(s),
             Ok((
                 &b""[..],
                 GgaData {
-                    time: None,
+                    time: Some(GpsTime { hour: 17, minute: 59, second: 29, millisecond: 860 }),
                     position: None,
-                    quality: None,
-                    hdop: Some(2.9),
-                    sats_in_view: None,
+                    quality: Some(GpsQuality::FixNotAvailable),
+                    hdop: Some(25.5),
+                    sats_in_view: Some(0),
                     geoid_altitude: None,
                     age_of_differential: None,
                     altitude: None,

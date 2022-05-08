@@ -100,7 +100,7 @@ pub(crate) fn invalid_height_check<'a>(
 ) -> Result<Option<f32>, NmeaSentenceError> {
     Ok(match height {
         Some(val) => match val {
-            b"-" => None,
+            b"-" | b"" => None,
             val => Some(parse_num::<f32>(val)?),
         },
         None => None,
