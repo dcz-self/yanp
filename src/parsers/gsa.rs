@@ -78,9 +78,35 @@ named!(pub (crate) parse_gsa<GsaData>,
             hdop: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             char!(',') >>
             vdop: opt!(map_res!(take_until!("*"), parse_num::<f32>)) >>
+            // garbage data
+            opt!(take_until!("*")) >>
             char!('*') >>
             (selection_mode, mode, sat1, sat2, sat3, sat4, sat5, sat6, sat7, sat8, sat9, sat10, sat11, sat12, pdob, hdop, vdop)
         ),
         build_gsa
     )
 );
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn parse() {
+        let s = b"A,3,08,10,22,27,32,,,,,,,,4.9,2.9,3.9,1*";
+        assert_eq!(
+            parse_gsa(s),
+            Ok((
+                &b""[..],
+                GsaData {
+                    selection_mode: Some(GsaSelectionMode::Automatic),
+                    satellites: [Some(8), Some(10), Some(22), Some(27), Some(32), None, None, None, None, None, None, None],
+                    pdob: Some(4.9),
+                    hdop: Some(2.9),
+                    vdop: None,
+                    mode: Some(GsaMode::Fix3D),
+                },
+            ))
+        )
+    }  
+}
