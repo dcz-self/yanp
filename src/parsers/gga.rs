@@ -35,9 +35,9 @@ named!(pub (crate) parse_gga<GgaData>,
         do_parse!(
             time: opt!(complete!(parse_utc_stamp)) >>
             char!(',') >>
-            position: opt!(
+            position: alt!(
                 complete!(parse_gps_position)
-                //| nom::combinator::value(None, take_until!(","))
+                | nom::combinator::value(None, take_until!(","))
             )
             >>
             char!(',') >>
