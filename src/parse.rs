@@ -185,7 +185,8 @@ pub enum SentenceData<'a> {
 pub struct GpsTime {
     pub hour: u8,
     pub minute: u8,
-    pub second: f32,
+    pub second: u8,
+    pub millisecond: u16,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -387,7 +388,7 @@ pub struct RmbData<'a> {
 pub struct RmcData {
     pub time: Option<GpsTime>,
     pub status: Option<RmStatus>,
-    pub position: GpsPosition,
+    pub position: Option<GpsPosition>,
     pub speed: Option<f32>,
     pub heading: Option<f32>,
     pub date: Option<GpsDate>,

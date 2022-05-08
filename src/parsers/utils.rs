@@ -2,8 +2,20 @@ use crate::errors::NmeaSentenceError;
 use crate::parse::*;
 pub(crate) use nom::{map_res, named, one_of, opt, tag, take, take_until};
 
+/// digits: The first digit is multiplied by 10^digits
 pub(crate) fn parse_num<I: core::str::FromStr>(data: &[u8]) -> Result<I, NmeaSentenceError> {
-    str::parse::<I>(unsafe { core::str::from_utf8_unchecked(data) })
+    let raw = unsafe { core::str::from_utf8_unchecked(data) };
+    str::parse::<I>(raw)
+        .map_err(|_| NmeaSentenceError::GeneralParsingError)
+}
+
+/// digits: The first digit is at the place of 10^digits. Missing digits are 0s.
+pub(crate) fn parse_num_fill<
+    I: core::str::FromStr + core::ops::Mul<I, Output=I> + Copy
+>(data: &[u8], digits: u8) -> Result<I, NmeaSentenceError> {
+    let raw = unsafe { core::str::from_utf8_unchecked(data) };
+    str::parse::<I>(raw)
+        .map(|v| (0..(digits - raw.len() as u8)).fold(v, |a, _| a * v))
         .map_err(|_| NmeaSentenceError::GeneralParsingError)
 }
 
@@ -21,14 +33,20 @@ named!(pub (crate) parse_utc_stamp<GpsTime>,
         do_parse!(
             hour: map_res!(take!(2), parse_num::<u8>) >>
             minute:  map_res!(take!(2), parse_num::<u8>) >>
-            second:  map_res!(take_until!(","), parse_num::<f32>) >>
-            (hour, minute, second)
+            second:  map_res!(take!(2), parse_num::<u8>) >>
+            char!('.') >>
+            millisecond: map_res!(
+                take_until!(","),
+                |n| parse_num_fill::<u16>(n, 3)
+            ) >>
+            (hour, minute, second, millisecond)
         ),
-        |timestamp: (u8, u8, f32)| -> Result<GpsTime, NmeaSentenceError>{
+        |timestamp: (u8, u8, u8, u16)| -> Result<GpsTime, NmeaSentenceError>{
             Ok(GpsTime{
                 hour: timestamp.0,
                 minute: timestamp.1,
                 second: timestamp.2,
+                millisecond: timestamp.3,
             })
         }
     )

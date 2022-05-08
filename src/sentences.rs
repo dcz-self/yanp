@@ -3,6 +3,9 @@ use crate::errors::NmeaSentenceError;
 macro_rules! general_sentences {
     ($($string_type:tt => $STYPE:ident),+) => {
         pub (crate) fn parse_general_sentence(sentence: &[u8]) -> Result<GeneralSentence, NmeaSentenceError> {
+            if sentence.len() < 7 + 4 {
+                return Err(NmeaSentenceError::SentenceLengthError(9));
+            }
             let (prefix, rest) = sentence.split_at(7);
             let (data, checksum) = rest.split_at(rest.len() - 4);
             let checksum = parse_hex(&checksum[0..2])?;

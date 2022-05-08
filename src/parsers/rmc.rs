@@ -6,7 +6,7 @@ fn build_rmc<'a>(
     sentence: (
         Option<GpsTime>,
         Option<char>,
-        GpsPosition,
+        Option<GpsPosition>,
         Option<f32>,
         Option<f32>,
         Option<GpsDate>,
@@ -33,7 +33,7 @@ named!(pub (crate) parse_rmc<RmcData>,
             char!(',') >>
             status: opt!(one_of!("AVP")) >>
             char!(',') >>
-            position: complete!(parse_gps_position) >>
+            position: opt!(complete!(parse_gps_position)) >>
             char!(',') >>
             speed: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             char!(',') >>
@@ -44,9 +44,29 @@ named!(pub (crate) parse_rmc<RmcData>,
             magnetic_variation: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             char!(',') >>
             magnetic_direction: opt!(one_of!("EW")) >>
+            // AT6558 returns two etra fields, see tests
+            take_until!("*") >>
             char!('*') >>
             (time, status, position, speed, heading, date, magnetic_variation, magnetic_direction)
         ),
         build_rmc
     )
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn parse() {
+        let s = b"163428.000,A,0053.9,N,00002.33,E,0.58,0.00,080522,,,E,V*";
+        assert_eq!(
+            parse_rmc(s),
+            Ok((
+                &b""[..],
+                RmcData { time: Some(GpsTime { hour: 16, minute: 34,
+                second: 28, millisecond: 0 }), status: Some(RmStatus::Active), position: Some(GpsPosition { lat: 0.8983334, lat_dir: LatitudeDirection::North, lon: 0.03883333, lon_dir: LongitudeDirection::East }), speed: Some(0.58), heading: Some(0.0), date: Some(GpsDate { day: 8, month: 5, year: 22 }), magnetic_variation: None, magnetic_direction: None },
+            ))
+        )
+        
+    }
+}
