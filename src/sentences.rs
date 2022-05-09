@@ -88,6 +88,7 @@ general_sentences!(
     b"STN" => STN,
     b"TLL" => TLL,
     b"TTM" => TTM,
+    b"TXT" =>TXT,
     b"VBW" => VBW,
     b"VDR" => VDR,
     b"VHW" => VHW,

@@ -162,6 +162,7 @@ pub enum SentenceData<'a> {
     STN(StnData),
     TLL(TllData),
     TTM(TtmData),
+    TXT(TxtData<'a>),
     VBW(VbwData),
     VDR(VdrData),
     VHW(VhwData),
@@ -416,6 +417,16 @@ pub struct StnData {
 pub struct TllData {}
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TtmData {}
+
+// Amendment to NMEA0183 Version 4.10
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TxtData<'a> {
+    pub total: Option<u8>,
+    pub sentence: Option<u8>,
+    pub id: Option<u8>,
+    pub text: &'a [u8],
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct VbwData {
     pub lon_water_speed: Option<f32>,
@@ -542,6 +553,7 @@ pub(crate) fn parse_sentence_data<'a>(
             STN => parsers::stn::parse_stn,
             //TLL => parse_tll,
             //TTM => parse_ttm,
+            TXT => parsers::txt::parse,
             VBW => parsers::vbw::parse_vbw,
             //VDR => parse_vdr,
             //VHW => parse_vhw,
