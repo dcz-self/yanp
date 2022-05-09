@@ -2,6 +2,25 @@ use super::utils::*;
 use crate::errors::NmeaSentenceError;
 use crate::parse::*;
 
+use nom::combinator::{map_res, rest};
+use nom::character::complete::char;
+
+pub(crate) fn parse_speed(inp: &[u8]) -> Result<(u16, u8), nom::Err<nom::error::Error<&[u8]>>> {
+    next!(inp, whole = map_res(
+        nom::bytes::complete::take_until("."),
+        parse_num::<u16>,
+    ));
+    next!(inp, char('.'));
+    next!(inp, hundredths = map_res(
+        rest,
+        parse_num::<u8>,
+    ));
+    let _ = inp;
+    
+    Ok((whole, hundredths))
+}
+
+
 named!(pub (crate) parse_vtg<VtgData>,
     map_res!(
         do_parse!(
@@ -11,13 +30,13 @@ named!(pub (crate) parse_vtg<VtgData>,
             alt!(tag!(",M,") | tag!(",,"))>>
             speed_knots: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             alt!(tag!(",N,") | tag!(",,")) >>
-            speed_kmh: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
+            speed_kmh: opt!(map_res!(take_until!(","), parse_speed)) >>
             char!(',') >> opt!(char!('K')) >> opt!(char!(',')) >>
             mode: opt!(one_of!("ADEMSN")) >>
             char!('*') >>
             (bearing_true, bearing_magnetic, speed_knots, speed_kmh, mode)
         ),
-        | sentence: (Option<f32>, Option<f32>, Option<f32>, Option<f32>, Option<char>)| -> Result<VtgData, NmeaSentenceError> {
+        | sentence: (Option<f32>, Option<f32>, Option<f32>, Option<(u16, u8)>, Option<char>)| -> Result<VtgData, NmeaSentenceError> {
             Ok(VtgData{
                 bearing_true: sentence.0,
                 bearing_magnetic: sentence.1,
@@ -43,7 +62,7 @@ mod tests {
                 VtgData { bearing_magnetic: None,
                     bearing_true: Some(0.0),
                     speed_knots: Some(0.0),
-                    speed_kmh: Some(0.0),
+                    speed_kmh: Some((0, 0)),
                     mode: Some('A'),
                 },
             ))

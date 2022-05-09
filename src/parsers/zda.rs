@@ -4,26 +4,6 @@ use crate::parse::*;
 use nom::combinator::opt;
 use nom::character::complete::char;
 
-macro_rules! next {
-    ($input:ident, $output:ident = $op:expr) => {
-        let ($input, $output) = $op($input)?;
-    };
-    ($input:ident, $op:expr) => {
-        next!($input, _x = $op)
-    }
-}
-
-fn num<T: core::str::FromStr>(inp: &[u8])
-    -> Result<
-        (&[u8], Option<T>),
-        nom::Err<nom::error::Error<&[u8]>>
-    >
-{
-    opt(nom::combinator::map_res(
-        nom::bytes::complete::take_until(","),
-        parse_num::<T>,
-    ))(inp)
-}
 
 pub(crate) fn parse(inp: &[u8]) -> Result<(&[u8], ZdaData), nom::Err<nom::error::Error<&[u8]>>> {
     next!(inp, time = opt(parse_utc_stamp));

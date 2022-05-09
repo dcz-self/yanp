@@ -1,6 +1,29 @@
 use crate::errors::NmeaSentenceError;
 use crate::parse::*;
 pub(crate) use nom::{map_res, named, one_of, opt, tag, take, take_until};
+use nom::combinator::opt;
+
+
+macro_rules! next {
+    ($input:ident, $output:ident = $op:expr) => {
+        let ($input, $output) = $op($input)?;
+    };
+    ($input:ident, $op:expr) => {
+        next!($input, _x = $op)
+    }
+}
+
+pub(crate) fn num<T: core::str::FromStr>(inp: &[u8])
+    -> Result<
+        (&[u8], Option<T>),
+        nom::Err<nom::error::Error<&[u8]>>
+    >
+{
+    opt(nom::combinator::map_res(
+        nom::bytes::complete::take_until(","),
+        parse_num::<T>,
+    ))(inp)
+}
 
 /// digits: The first digit is multiplied by 10^digits
 pub(crate) fn parse_num<I: core::str::FromStr>(data: &[u8]) -> Result<I, NmeaSentenceError> {

@@ -396,7 +396,7 @@ pub struct RmcData {
     pub time: Option<GpsTime>,
     pub status: Option<RmStatus>,
     pub position: Option<GpsPosition>,
-    pub speed: Option<f32>,
+    pub speed: Option<f32>, // knots!!!
     pub heading: Option<f32>,
     pub date: Option<GpsDate>,
     pub magnetic_variation: Option<f32>,
@@ -455,7 +455,7 @@ pub struct VtgData {
     pub bearing_true: Option<f32>,
     pub bearing_magnetic: Option<f32>,
     pub speed_knots: Option<f32>,
-    pub speed_kmh: Option<f32>,
+    pub speed_kmh: Option<(u16, u8)>,
     pub mode: Option<char>,
 }
 #[derive(Debug, Clone, Copy, PartialEq)]
