@@ -488,9 +488,10 @@ pub struct ZfoData {}
 pub struct ZtgData {}
 
 macro_rules! sentence_parse_generator {
-    ($sentence:ident : [$($TYPE:ident => $function:path,)+]) => {
+    ($sentence:ident : [$([$F:expr] $TYPE:ident => $function:path,)+]) => {
         match $sentence.sentence_type {
             $(
+                #[cfg(feature=$F)]
                 SentenceType::$TYPE => Ok(SentenceData::$TYPE(parse_result_to_data($function($sentence.data))?)),
             )+
             _ => Err(NmeaSentenceError::TypeNotImplementedError($sentence.sentence_type)),
@@ -519,6 +520,7 @@ pub(crate) fn parse_sentence_data<'a>(
             //APA => parse_apa,
             //APB => parse_apb,
             //BEC => parse_bec,
+            /*
             BOD => parsers::bod::parse_bod,
             BWC => parsers::bwc::parse_bwc,
             //BWR => parse_bwr,
@@ -570,7 +572,10 @@ pub(crate) fn parse_sentence_data<'a>(
             //VHW => parse_vhw,
             //VLW => parse_vlw,
             //VPW => parse_vpw,
+            */
+            ["vtg"]
             VTG => parsers::vtg::parse_vtg,
+            /*
             //VWR => parse_vwr,
             //WCV => parse_wcv,
             //WNC => parse_wnc,
@@ -580,7 +585,7 @@ pub(crate) fn parse_sentence_data<'a>(
             //XTR => parse_xtr,
             ZDA => parsers::zda::parse,
             //ZFO => parse_zfo,
-            //ZTG => parse_ztg,
+            //ZTG => parse_ztg,*/
         ]
     )
 }

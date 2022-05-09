@@ -15,6 +15,7 @@ pub(crate) mod rmc;
 pub(crate) mod stn;
 pub(crate) mod txt;
 pub(crate) mod vbw;
+#[cfg(feature="vtg")]
 pub(crate) mod vtg;
 pub(crate) mod wpl;
 pub(crate) mod zda;
