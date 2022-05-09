@@ -11,6 +11,7 @@ pub(crate) mod gsv;
 pub(crate) mod hdt;
 pub(crate) mod rma;
 pub(crate) mod rmb;
+#[cfg(feature="rmc")]
 pub(crate) mod rmc;
 pub(crate) mod stn;
 pub(crate) mod txt;

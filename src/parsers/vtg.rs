@@ -2,25 +2,6 @@ use super::utils::*;
 use crate::errors::NmeaSentenceError;
 use crate::parse::*;
 
-use nom::combinator::{map_res, rest};
-use nom::character::complete::char;
-
-pub(crate) fn parse_speed(inp: &[u8]) -> Result<(u16, u8), nom::Err<nom::error::Error<&[u8]>>> {
-    next!(inp, whole = map_res(
-        nom::bytes::complete::take_until("."),
-        parse_num::<u16>,
-    ));
-    next!(inp, char('.'));
-    next!(inp, hundredths = map_res(
-        rest,
-        parse_num::<u8>,
-    ));
-    let _ = inp;
-    
-    Ok((whole, hundredths))
-}
-
-
 named!(pub (crate) parse_vtg<VtgData>,
     map_res!(
         do_parse!(

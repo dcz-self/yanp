@@ -396,7 +396,7 @@ pub struct RmcData {
     pub time: Option<GpsTime>,
     pub status: Option<RmStatus>,
     pub position: Option<GpsPosition>,
-    pub speed: Option<f32>, // knots!!!
+    pub speed_knots: Option<(u16, u8)>, // knots!!!
     pub heading: Option<f32>,
     pub date: Option<GpsDate>,
     pub magnetic_variation: Option<f32>,
@@ -556,7 +556,10 @@ pub(crate) fn parse_sentence_data<'a>(
             //ROO => parse_roo,
             RMA => parsers::rma::parse_rma,
             RMB => parsers::rmb::parse_rmb,
+            */
+            ["rmc"]
             RMC => parsers::rmc::parse_rmc,
+            /*
             //ROT => parse_rot,
             //RPM => parse_rpm,
             //RSA => parse_rsa,

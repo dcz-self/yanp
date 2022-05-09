@@ -7,7 +7,7 @@ fn build_rmc<'a>(
         Option<GpsTime>,
         Option<char>,
         Option<GpsPosition>,
-        Option<f32>,
+        Option<(u16, u8)>,
         Option<f32>,
         Option<GpsDate>,
         Option<f32>,
@@ -18,7 +18,7 @@ fn build_rmc<'a>(
         time: sentence.0,
         status: translate_option!(sentence.1, RmStatus),
         position: sentence.2,
-        speed: sentence.3,
+        speed_knots: sentence.3,
         heading: sentence.4,
         date: sentence.5,
         magnetic_variation: sentence.6,
@@ -35,7 +35,7 @@ named!(pub (crate) parse_rmc<RmcData>,
             char!(',') >>
             position: opt!(complete!(parse_gps_position)) >>
             char!(',') >>
-            speed: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
+            speed_knots: opt!(map_res!(take_until!(","), parse_speed)) >>
             char!(',') >>
             heading: opt!(map_res!(take_until!(","), parse_num::<f32>)) >>
             char!(',') >>
@@ -47,7 +47,7 @@ named!(pub (crate) parse_rmc<RmcData>,
             // AT6558 returns two etra fields, see tests
             take_until!("*") >>
             char!('*') >>
-            (time, status, position, speed, heading, date, magnetic_variation, magnetic_direction)
+            (time, status, position, speed_knots, heading, date, magnetic_variation, magnetic_direction)
         ),
         build_rmc
     )
@@ -64,7 +64,8 @@ mod tests {
             Ok((
                 &b""[..],
                 RmcData { time: Some(GpsTime { hour: 16, minute: 34,
-                second: 28, millisecond: 0 }), status: Some(RmStatus::Active), position: Some(GpsPosition { lat: 0.8983334, lat_dir: LatitudeDirection::North, lon: 0.03883333, lon_dir: LongitudeDirection::East }), speed: Some(0.58), heading: Some(0.0), date: Some(GpsDate { day: 8, month: 5, year: 22 }), magnetic_variation: None, magnetic_direction: None },
+                second: 28, millisecond: 0 }), status: Some(RmStatus::Active), position: Some(GpsPosition { lat: 0.8983334, lat_dir: LatitudeDirection::North, lon: 0.03883333, lon_dir: LongitudeDirection::East }), speed_knots: Some((0, 58)),
+                heading: Some(0.0), date: Some(GpsDate { day: 8, month: 5, year: 22 }), magnetic_variation: None, magnetic_direction: None },
             ))
         )
         
