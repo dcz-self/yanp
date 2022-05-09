@@ -208,6 +208,12 @@ pub struct GpsDate {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Zone {
+    pub hours: u8,
+    pub minutes: u8,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 /// Represents a GSV satellite
 pub struct GsvSatellite {
     pub sat_id: Option<u8>,
@@ -470,7 +476,12 @@ pub struct XteData {}
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct XtrData {}
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct ZdaData {}
+pub struct ZdaData {
+    pub time: Option<GpsTime>,
+    pub date: Option<GpsDate>,
+    pub zone: Option<Zone>,
+    
+}
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ZfoData {}
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -567,7 +578,7 @@ pub(crate) fn parse_sentence_data<'a>(
             //XDR => parse_xdr,
             //XTE => parse_xte,
             //XTR => parse_xtr,
-            //ZDA => parse_zda,
+            ZDA => parsers::zda::parse,
             //ZFO => parse_zfo,
             //ZTG => parse_ztg,
         ]

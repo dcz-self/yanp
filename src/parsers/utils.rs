@@ -1,6 +1,6 @@
 use crate::errors::NmeaSentenceError;
 use crate::parse::*;
-pub(crate) use nom::{map_res, named, one_of, opt, tag, take, take_until, opt_res};
+pub(crate) use nom::{map_res, named, one_of, opt, tag, take, take_until};
 
 /// digits: The first digit is multiplied by 10^digits
 pub(crate) fn parse_num<I: core::str::FromStr>(data: &[u8]) -> Result<I, NmeaSentenceError> {
